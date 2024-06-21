@@ -92,7 +92,7 @@ const likeUnlikePost = async (req,res) => {
         if(userLikedPost){
             await Post.updateOne({_id: postId}, {$pull:{likes:userId} });
             await Subscriber.updateOne({_id: userId}, {$pull:{likedPosts:postId} });
-            const updatedlikes =post.likes.filter((id) => id.toString() !== userId.toString());
+            const updatedLikes =post.likes.filter((id) => id.toString() !== userId.toString());
             res.status(200).json(updatedLikes);
         }
         else{
