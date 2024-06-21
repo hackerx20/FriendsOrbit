@@ -1,5 +1,6 @@
 import { FaUser }  from "react-icons/fa"; 
 import { Link }  from "react-router-dom"; 
+import {FaHeart} from "react-icons/fa";
 import {useMutation , useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from 'react-hot-toast';
 import {IoSettingsOutline} from 'react-icons/io5';
