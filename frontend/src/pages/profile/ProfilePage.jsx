@@ -1,17 +1,21 @@
-import {useEffect, useState, useRef} from 'react';
-import {Link, useParams} from 'react-router-dom';
-import ProfileHeaderSkeleton from './ProfileHeaderSkeleton.jsx';
-import Posts from './Posts.jsx';
-import EditProfileModal from './EditProfileModal';
-import {POSTS} from '../JavaScriptFiles/example.js';
-import { FaArrowLeft} from 'react-icons/fa6';
-import {IoCalendarOutline} from 'react-icons/io5';
-import { FaLink} from 'react-icons/fa';
-import {MdEdit} from 'react-icons/md';
-import {useQuery} from "@tanstack/react-query";
-import {formatMemberSinceDate} from "../JavaScriptFiles/index.js";
-import useFollow from "./useFollow.jsx";
-import useUpdateUserProfile from "./useUpdateUserProfile.jsx";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+
+import Posts from "../../components/common/Posts";
+import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
+import EditProfileModal from "./EditProfileModal";
+
+import { POSTS } from "../../utils/db/dummy";
+
+import { FaArrowLeft } from "react-icons/fa6";
+import { IoCalendarOutline } from "react-icons/io5";
+import { FaLink } from "react-icons/fa";
+import { MdEdit } from "react-icons/md";
+import { useQuery } from "@tanstack/react-query";
+import { formatMemberSinceDate } from "../../utils/date";
+
+import useFollow from "../../hooks/useFollow";
+import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
 
 const ProfilePage = () => {
     const [coverImg, setCoverImg] = useState(null);

@@ -1,5 +1,5 @@
 import { useEffect,useState } from "react";
-import useUpdateUserProfile from "./useUpdateUserProfile.jsx";
+import useUpdateUserProfile from "../../hooks/useUpdateUserProfile.jsx";
 
 const EditProfileModal = ({authUser}) =>{
     const [formData, setFormData] = useState({

@@ -1,7 +1,9 @@
-import { Link }  from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import useFollow from "./useFollow.jsx";
-import RightPanelSkeleton from './RightPanelSkeleton.jsx';
+
+import useFollow from "../../hooks/useFollow";
+
+import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 const LoadingSpinner = ({size = "md"}) => {
     const sizeClass = `loading-${size}`;
     return <span className={`loading loading-spinner ${sizeClass}`} />;
