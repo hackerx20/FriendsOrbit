@@ -11,19 +11,19 @@ const SignUpPage = () => {
     const [formData, setFormData] = useState({
         email:"",
         username:"",
-        puraNaam:"",
+        fullName:"",
         password:"",
     });
     const queryClient =useQueryClient();
     const {mutate, isPending, isError, error} = useMutation({
-        mutationFn: async ({email, username, puraNaam, password}) => {
+        mutationFn: async ({email, username, fullName, password}) => {
             try {
                 const res = await fetch("/api/auth/signup",{
                     method:"POST",
                     headers: {
 						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({email, username, puraNaam, password}),
+					body: JSON.stringify({email, username, fullName, password}),
                 });
                 const data = await res.json();
                 if(!res.ok){
@@ -88,9 +88,9 @@ const SignUpPage = () => {
 								type='text'
 								className='grow'
 								placeholder='Full Name'
-								name='puraNaam'
+								name='fullName'
 								onChange={handleInputChange}
-								value={formData.puraNaam}
+								value={formData.fullName}
 							/>
 						</label>
 					</div>

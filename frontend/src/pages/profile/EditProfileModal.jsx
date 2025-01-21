@@ -3,7 +3,7 @@ import useUpdateUserProfile from "../../hooks/useUpdateUserProfile.jsx";
 
 const EditProfileModal = ({authUser}) =>{
     const [formData, setFormData] = useState({
-        puraNaam: "",
+        fullName: "",
         username: "",
         email: "",
         bio: "",
@@ -18,7 +18,7 @@ const EditProfileModal = ({authUser}) =>{
     useEffect(() => {
         if(authUser){
             setFormData({
-                puraNaam: authUser.puraNaam,
+                fullName: authUser.fullName,
                 username:authUser.username,
                 email: authUser.email,
                 bio: authUser.bio,
@@ -52,8 +52,8 @@ const EditProfileModal = ({authUser}) =>{
 								type='text'
 								placeholder='Full Name'
 								className='flex-1 input border border-gray-700 rounded p-2 input-md'
-								value={formData.puraNaam}
-								name='puraNaam'
+								value={formData.fullName}
+								name='fullName'
 								onChange={handleInputChange}
 							/>
 							<input
