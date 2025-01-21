@@ -73,7 +73,7 @@ const suggestUsers = async (req,res) => {
     }
 };
 const updateUser = async(req,res) => {
-    const{puraNaam, email, username, currentPassword, newPassword, bio, link }=req.body;
+    const{fullName, email, username, currentPassword, newPassword, bio, link }=req.body;
     let{userImage, bgImage}=req.body;
     const userId = req.user._id;
     try{
@@ -104,7 +104,7 @@ const updateUser = async(req,res) => {
             const uploadedResponse = await cloudinary.uploader.upload(bgImage);
             bgImage = uploadedResponse.secure_url;
         }
-        user.puraNaam = puraNaam || user.puraNaam;
+        user.fullName = fullName || user.fullName;
         user.email= email || user.email;
         user.userImage= userImage || user.userImage;
         user.bgImage = bgImage || user.bgImage;

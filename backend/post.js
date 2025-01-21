@@ -110,7 +110,7 @@ const likeUnlikePost = async (req,res) => {
         }
     }
     catch(error){
-        console.log("Error in liking and unliking Post.",error);
+        console.log("Error in liking and disliking Post.",error);
         res.status(500).json({ error:"Internal server error"});
     }
 };

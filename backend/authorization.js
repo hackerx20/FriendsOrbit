@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import Subscriber from "./Models/userConfig.js";
 const signup = async (req,res) =>{
     try{
-        const { puraNaam , username, email, password }= req.body;
+        const { fullName , username, email, password }= req.body;
         const correctEmail = /^[^\s@]+@[^\s@]+$/;
         if(!correctEmail.test(email)){
             return res.status(400).json({ error: "Wrong Email Type."});
@@ -26,7 +26,7 @@ const signup = async (req,res) =>{
             return res.status(400).json({ error:"Email is already in use."});
         }
         const newUser =new Subscriber({
-            puraNaam,
+            fullName,
             username,
             email,
             password,
@@ -37,7 +37,7 @@ const signup = async (req,res) =>{
             
             res.status(201).json({
                 _id:newUser._id,
-                puraNaam:newUser.puraNaam,
+                fullName:newUser.fullName,
                 userName:newUser.userName,
                 email: newUser.email,
                 followers: newUser.followers,
@@ -92,7 +92,7 @@ const login = async(req,res) => {
             userImage:user.userImage,
             followers: user.followers,
             bgImage:user.bgImage,
-            puraNaam:user.puraNaam,
+            fullName:user.fullName,
         });
     }
     catch (error){
