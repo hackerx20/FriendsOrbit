@@ -89,7 +89,7 @@ const Post = ({ post }) => {
                 throw new Error(error);
             }
         },
-        onSuccess: (updatedLikes) => {
+        onSuccess: () => {
             toast.success("comment successfully Posted");
             setComment("");
             queryClient.invalidateQueries({queryKey: ["posts"] });
@@ -133,7 +133,6 @@ const Post = ({ post }) => {
 								{!isDeleting && (
 									<FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />
 								)}
-
 								{isDeleting && <LoadingSpinner size='sm' />}
 							</span>
 						)}

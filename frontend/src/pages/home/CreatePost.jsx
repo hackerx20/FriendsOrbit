@@ -45,7 +45,7 @@ const CreatePost = () => {
         e.preventDefault();
         createPost({text,img});
     };
-    const handleImgChange = (e, state) => {
+    const handleImgChange = (e) => {
         const file= e.target.files[0];
         if(file){
             const reader = new FileReader();
