@@ -32,10 +32,24 @@ const AIChatPage = () => {
   const { data: sessions, isLoading: sessionsLoading } = useQuery({
     queryKey: ['aiChatSessions'],
     queryFn: async () => {
-      const res = await fetch('/api/ai-chat/sessions');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      return data;
+     try {
+       const res = await fetch('/api/ai-chat/sessions');
+       
+       if (!res.ok) {
+         throw new Error(`HTTP error! status: ${res.status}`);
+       }
+       
+       const text = await res.text();
+       if (!text) {
+         return [];
+       }
+       
+       const data = JSON.parse(text);
+       return data;
+     } catch (error) {
+       console.error("AI sessions error:", error);
+       return [];
+     }
     }
   });
 
@@ -43,11 +57,26 @@ const AIChatPage = () => {
   const { data: messages, isLoading: messagesLoading } = useQuery({
     queryKey: ['aiChatMessages', selectedSession?.id],
     queryFn: async () => {
-      if (!selectedSession) return [];
-      const res = await fetch(`/api/ai-chat/sessions/${selectedSession.id}/messages`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      return data;
+     try {
+       if (!selectedSession) return [];
+       
+       const res = await fetch(`/api/ai-chat/sessions/${selectedSession.id}/messages`);
+       
+       if (!res.ok) {
+         throw new Error(`HTTP error! status: ${res.status}`);
+       }
+       
+       const text = await res.text();
+       if (!text) {
+         return [];
+       }
+       
+       const data = JSON.parse(text);
+       return data;
+     } catch (error) {
+       console.error("AI messages error:", error);
+       return [];
+     }
     },
     enabled: !!selectedSession
   });

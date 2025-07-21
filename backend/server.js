@@ -159,12 +159,26 @@ if (process.env.NODE_ENV === 'production') {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+ 
+ // Ensure we always send JSON response
+ if (!res.headersSent) {
+   res.status(500).json({ error: 'Internal server error' });
+ }
 });
 
 // 404 handler
 app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+ // Ensure we always send JSON response for API routes
+ if (req.originalUrl.startsWith('/api/')) {
+   res.status(404).json({ error: 'Route not found' });
+ } else {
+   // For non-API routes in production, serve the React app
+   if (process.env.NODE_ENV === 'production') {
+     res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+   } else {
+     res.status(404).json({ error: 'Route not found' });
+   }
+ }
 });
 
 server.listen(PORT, () => {

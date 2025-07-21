@@ -10,10 +10,24 @@ const RightPanel = () => {
   const { data: suggestedUsers, isLoading } = useQuery({
     queryKey: ["suggestedUsers"],
     queryFn: async () => {
-      const res = await fetch("/api/users/suggested");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong");
-      return data;
+     try {
+       const res = await fetch("/api/users/suggested");
+       
+       if (!res.ok) {
+         throw new Error(`HTTP error! status: ${res.status}`);
+       }
+       
+       const text = await res.text();
+       if (!text) {
+         return [];
+       }
+       
+       const data = JSON.parse(text);
+       return data;
+     } catch (error) {
+       console.error("Suggested users error:", error);
+       return [];
+     }
     },
   });
 

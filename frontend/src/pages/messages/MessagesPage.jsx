@@ -31,10 +31,24 @@ const MessagesPage = () => {
   const { data: conversations, isLoading: conversationsLoading } = useQuery({
     queryKey: ['conversations'],
     queryFn: async () => {
-      const res = await fetch('/api/messages/conversations');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      return data;
+     try {
+       const res = await fetch('/api/messages/conversations');
+       
+       if (!res.ok) {
+         throw new Error(`HTTP error! status: ${res.status}`);
+       }
+       
+       const text = await res.text();
+       if (!text) {
+         return [];
+       }
+       
+       const data = JSON.parse(text);
+       return data;
+     } catch (error) {
+       console.error("Conversations error:", error);
+       return [];
+     }
     }
   });
 
@@ -42,11 +56,26 @@ const MessagesPage = () => {
   const { data: messages, isLoading: messagesLoading } = useQuery({
     queryKey: ['messages', selectedUser?.id],
     queryFn: async () => {
-      if (!selectedUser) return [];
-      const res = await fetch(`/api/messages/conversation/${selectedUser.id}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      return data;
+     try {
+       if (!selectedUser) return [];
+       
+       const res = await fetch(`/api/messages/conversation/${selectedUser.id}`);
+       
+       if (!res.ok) {
+         throw new Error(`HTTP error! status: ${res.status}`);
+       }
+       
+       const text = await res.text();
+       if (!text) {
+         return [];
+       }
+       
+       const data = JSON.parse(text);
+       return data;
+     } catch (error) {
+       console.error("Messages error:", error);
+       return [];
+     }
     },
     enabled: !!selectedUser
   });
@@ -77,11 +106,26 @@ const MessagesPage = () => {
   const { data: searchResults } = useQuery({
     queryKey: ['userSearch', searchQuery],
     queryFn: async () => {
-      if (!searchQuery || searchQuery.length < 2) return [];
-      const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      return data;
+     try {
+       if (!searchQuery || searchQuery.length < 2) return [];
+       
+       const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`);
+       
+       if (!res.ok) {
+         throw new Error(`HTTP error! status: ${res.status}`);
+       }
+       
+       const text = await res.text();
+       if (!text) {
+         return [];
+       }
+       
+       const data = JSON.parse(text);
+       return data;
+     } catch (error) {
+       console.error("Search error:", error);
+       return [];
+     }
     },
     enabled: searchQuery.length >= 2
   });

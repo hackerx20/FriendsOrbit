@@ -31,10 +31,24 @@ const Posts = ({ feedType, username, userId }) => {
   } = useQuery({
     queryKey: ["posts", feedType, username, userId],
     queryFn: async () => {
-      const res = await fetch(POST_ENDPOINT);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong");
-      return data;
+     try {
+       const res = await fetch(POST_ENDPOINT);
+       
+       if (!res.ok) {
+         throw new Error(`HTTP error! status: ${res.status}`);
+       }
+       
+       const text = await res.text();
+       if (!text) {
+         return [];
+       }
+       
+       const data = JSON.parse(text);
+       return data;
+     } catch (error) {
+       console.error("Posts error:", error);
+       return [];
+     }
     },
   });
 

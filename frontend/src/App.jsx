@@ -24,14 +24,26 @@ function App() {
     queryFn: async () => {
       try {
         const res = await fetch("/api/auth/me");
-        const data = await res.json();
-        if (data.error) return null;
-        if (!res.ok) {
-          throw new Error(data.error || "Something went wrong");
-        }
+       
+       // Check if response is ok first
+       if (!res.ok) {
+         if (res.status === 401) {
+           return null; // User not authenticated
+         }
+         throw new Error(`HTTP error! status: ${res.status}`);
+       }
+       
+       // Check if response has content
+       const text = await res.text();
+       if (!text) {
+         return null;
+       }
+       
+       const data = JSON.parse(text);
         return data;
       } catch (error) {
-        throw new Error(error);
+       console.error("Auth check error:", error);
+       return null; // Return null instead of throwing to prevent app crash
       }
     },
     retry: false,
