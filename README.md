@@ -1,113 +1,178 @@
-# FriendsOrbit
+# FriendsOrbit - Modern Social Media Platform
 
-Social Media Web Application made using latest vite-react frontend framework.
+A full-stack social media application built with React, Node.js, PostgreSQL, and modern web technologies.
 
-# FRONTEND:-
+## ✨ Features
 
-## How to install REACT:
+- **User Authentication** - Secure signup/login with JWT
+- **Social Feed** - Create, like, comment on posts
+- **Real-time Messaging** - Chat with other users instantly
+- **AI Chat Assistant** - Powered by OpenAI GPT
+- **User Profiles** - Customizable profiles with images
+- **Follow System** - Follow/unfollow other users
+- **Responsive Design** - Works on all devices
+- **Modern UI** - Built with Tailwind CSS and DaisyUI
 
-Step1: First Step is to check whether you have Node.js installed on your device. You can run the commands given below to check whether Node.js is installed on your device or not.
+## 🛠️ Tech Stack
 
-```bash
-node -v
+### Frontend
+- **React 18** - Modern React with hooks
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **DaisyUI** - Beautiful UI components
+- **Framer Motion** - Smooth animations
+- **React Query** - Data fetching and caching
+- **Socket.IO Client** - Real-time communication
 
-npm -v
-```
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express.js** - Web framework
+- **PostgreSQL** - Relational database
+- **Socket.IO** - Real-time communication
+- **JWT** - Authentication
+- **Cloudinary** - Image storage
+- **OpenAI API** - AI chat functionality
 
-Step2: Now type the following commands on the Terminal in your VS code.
+## 🚀 Getting Started
 
-```bash
-npx create-react-app my-app
-```
+### Prerequisites
+- Node.js (v18 or higher)
+- PostgreSQL (v12 or higher)
+- npm or yarn
 
-```bash
-cd my-app
-```
+### Installation
 
-Step3: You can start the react App using the command below:
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd friendsorbit
+   ```
 
-```bash
-npm start
-```
-
-## Install the Latest Vite Framework:
-
-```bash
-npm create vite@latest .
-```
-
-Run the above command in your frontend folder to install the latest VITE-REACT plugin.
-
-## TechStack used in Frontend:
-
-React.js, Tailwind.css.
-
-## Install Tailwind.css in the folder:
-
-Run the command below to install the Tailwind.css with Vite:
-
-```bash
->npm install -D tailwindcss postcss autoprefixer
-
->npx tailwindcss init -p
-```
-## Various Dependencies Used:
-
-1. Tanstack/react-query(installation):
-
-```bash
-npm install @tanstack/react-query
-```
-
-2. React-router-dom && react-icons :
+2. **Install dependencies**
+   ```bash
+   # Install backend dependencies
+   npm install
    
-```bash
-npm install react-router-dom react-icons 
+   # Install frontend dependencies
+   cd frontend
+   npm install
+   cd ..
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your configuration:
+   - Database credentials
+   - JWT secret
+   - Cloudinary credentials (for image uploads)
+   - OpenAI API key (for AI chat)
+
+4. **Set up the database**
+   ```bash
+   # Create database
+   createdb friendsorbit
+   
+   # Run migrations
+   npm run db:migrate
+   ```
+
+5. **Start the development servers**
+   ```bash
+   # Start backend (from root directory)
+   npm run dev
+   
+   # Start frontend (in another terminal)
+   cd frontend
+   npm run dev
+   ```
+
+6. **Open your browser**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
+
+## 📁 Project Structure
+
+```
+friendsorbit/
+├── backend/
+│   ├── database/
+│   │   ├── connection.js
+│   │   ├── schema.sql
+│   │   └── migrate.js
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Post.js
+│   │   ├── Message.js
+│   │   └── AIChat.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── users.js
+│   │   ├── posts.js
+│   │   ├── messages.js
+│   │   └── ai-chat.js
+│   ├── middleware/
+│   │   └── auth.js
+│   └── server.js
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   ├── context/
+│   │   └── App.jsx
+│   └── package.json
+└── package.json
 ```
 
-3. react-hot-toast:
+## 🔧 Configuration
 
+### Database Schema
+The application uses PostgreSQL with the following main tables:
+- `users` - User accounts and profiles
+- `posts` - User posts and content
+- `messages` - Direct messages between users
+- `ai_chat_sessions` - AI chat conversations
+- `followers` - User follow relationships
+- `likes` - Post likes
+- `comments` - Post comments
+
+### Environment Variables
+See `.env.example` for all required environment variables.
+
+## 🚀 Deployment
+
+### Production Build
 ```bash
-npm install react-hot-toast
+npm run build
 ```
 
-# BACKEND:
+### Environment Setup
+1. Set `NODE_ENV=production`
+2. Configure production database
+3. Set up SSL certificates
+4. Configure reverse proxy (nginx recommended)
 
-## TechStack Used:
+## 🤝 Contributing
 
-MERN stack : Expressjs && MongoDB (for database);
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## DEPENDENCIES USED (how to install those dependencies):
+## 📝 License
 
-1. mongoose:
+This project is licensed under the ISC License.
 
-```bash
-npm install mongoose
-```
+## 🙏 Acknowledgments
 
-2. Express
+- OpenAI for GPT API
+- Cloudinary for image hosting
+- All the amazing open-source libraries used in this project
 
-```bash
-npm install express
-```
+## 📞 Support
 
-3. Cookie-Parser(for authentication Page):
-
-```bash
-npm install cookie-parser
-```
-
-4. Cloudinary (for cloudstorage){
-
-```bash
-npm install cloudinary
-```
-
-### Dev-Dependencies Like Nodemon:
-
-```bash
-npm install -D nodemon
-```
-
-etc...
-
+If you have any questions or need help, please open an issue on GitHub.
