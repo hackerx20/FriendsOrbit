@@ -13,17 +13,17 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="flex-[4_4_0] border-r border-base-300 min-h-screen">
+    <div className="flex-[4_4_0] border-r border-base-300 min-h-screen bg-base-100">
       {/* Header */}
-      <div className="sticky top-0 bg-base-100/80 backdrop-blur-md border-b border-base-300 z-10">
+      <div className="sticky top-0 bg-base-100/90 backdrop-blur-xl border-b border-base-300/50 z-10 shadow-sm">
         <div className="flex">
           {feedTabs.map((tab) => (
             <motion.div
               key={tab.id}
-              className={`flex-1 p-4 text-center cursor-pointer relative transition-colors ${
+              className={`flex-1 p-6 text-center cursor-pointer relative transition-all duration-300 ${
                 feedType === tab.id 
-                  ? 'text-primary font-semibold' 
-                  : 'text-base-content/70 hover:text-base-content hover:bg-base-200/50'
+                  ? 'text-primary font-bold text-lg' 
+                  : 'text-base-content/60 hover:text-base-content hover:bg-base-200/30 font-semibold'
               }`}
               onClick={() => setFeedType(tab.id)}
               whileHover={{ scale: 1.02 }}
@@ -32,7 +32,7 @@ const HomePage = () => {
               {tab.label}
               {feedType === tab.id && (
                 <motion.div
-                  className="absolute bottom-0 left-1/2 w-12 h-1 bg-primary rounded-full"
+                  className="absolute bottom-0 left-1/2 w-16 h-1 bg-gradient-to-r from-primary to-secondary rounded-full shadow-lg"
                   layoutId="activeTab"
                   initial={false}
                   style={{ x: '-50%' }}

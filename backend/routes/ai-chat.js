@@ -1,15 +1,22 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AIChat } from '../models/AIChat.js';
 import { authenticateToken } from '../middleware/auth.js';
 import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-1.5-flash",
+  generationConfig: {
+    temperature: 0.7,
+    topP: 0.8,
+    topK: 40,
+    maxOutputTokens: 1000,
+  }
 });
 
 // Rate limiting for AI chat
@@ -79,27 +86,20 @@ router.post('/sessions/:sessionId/messages', authenticateToken, aiChatLimit, [
     // Get conversation history for context
     const recentMessages = await AIChat.getSessionMessages(sessionId, 10);
     
-    // Prepare messages for OpenAI
-    const messages = [
-      {
-        role: 'system',
-        content: `You are FriendsOrbit AI, a helpful and friendly AI assistant integrated into a social media platform. You can help users with various tasks, answer questions, provide advice, and engage in casual conversation. Be conversational, helpful, and maintain a positive tone. Keep responses concise but informative.`
-      },
-      ...recentMessages.slice(-9).map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }))
-    ];
-
-    // Get AI response
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages,
-      max_tokens: 500,
-      temperature: 0.7
+    // Prepare conversation history for Gemini
+    const systemPrompt = `You are FriendsOrbit AI, a helpful and friendly AI assistant integrated into a social media platform. You can help users with various tasks, answer questions, provide advice, and engage in casual conversation. Be conversational, helpful, and maintain a positive tone. Keep responses concise but informative.`;
+    
+    // Build conversation context
+    let conversationHistory = systemPrompt + '\n\n';
+    recentMessages.slice(-9).forEach(msg => {
+      conversationHistory += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
     });
+    conversationHistory += `User: ${content}\nAssistant:`;
 
-    const aiResponse = completion.choices[0].message.content;
+    // Get AI response from Gemini
+    const result = await model.generateContent(conversationHistory);
+    const response = await result.response;
+    const aiResponse = response.text();
 
     // Save AI response
     const aiMessage = await AIChat.addMessage(sessionId, 'assistant', aiResponse);
@@ -111,7 +111,7 @@ router.post('/sessions/:sessionId/messages', authenticateToken, aiChatLimit, [
   } catch (error) {
     console.error('AI chat error:', error);
     
-    if (error.code === 'insufficient_quota') {
+    if (error.message?.includes('quota') || error.message?.includes('limit')) {
       return res.status(429).json({ error: 'AI service temporarily unavailable. Please try again later.' });
     }
     

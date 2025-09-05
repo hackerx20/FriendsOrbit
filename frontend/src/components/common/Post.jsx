@@ -13,7 +13,8 @@ import {
   MdShare, 
   MdDelete,
   MdVerified,
-  MdSend
+  MdSend,
+  MdMoreVert
 } from "react-icons/md";
 
 import LoadingSpinner from "./LoadingSpinner";
@@ -104,14 +105,10 @@ const Post = ({ post }) => {
   };
 
   return (
-    <motion.article
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="border-b border-base-300 p-4 hover:bg-base-100/50 transition-colors"
-    >
+    <div className="border-b border-base-300 bg-base-100">
       <div className="flex gap-3">
         {/* Avatar */}
-        <Link to={`/profile/${post.username}`} className="flex-shrink-0">
+        <Link to={`/profile/${post.username}`} className="flex-shrink-0 p-4 pb-0">
           <div className="avatar">
             <div className="w-12 rounded-full">
               <img 
@@ -123,81 +120,97 @@ const Post = ({ post }) => {
         </Link>
 
         {/* Post Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 p-4 pl-0">
           {/* Header */}
           <div className="flex items-center gap-2 mb-2">
             <Link 
               to={`/profile/${post.username}`}
-              className="font-semibold hover:underline flex items-center gap-1"
+              className="font-bold hover:underline flex items-center gap-1 text-base-content"
             >
               {post.full_name}
               {post.is_verified && (
                 <MdVerified className="w-4 h-4 text-primary" />
               )}
             </Link>
-            <span className="text-base-content/60">·</span>
+            <span className="text-base-content/50">·</span>
             <Link 
               to={`/profile/${post.username}`}
-              className="text-base-content/60 hover:underline"
+              className="text-base-content/50 hover:underline text-sm"
             >
               @{post.username}
             </Link>
-            <span className="text-base-content/60">·</span>
-            <time className="text-base-content/60 text-sm">
+            <span className="text-base-content/50">·</span>
+            <time className="text-base-content/50 text-sm">
               {formatDate(post.created_at)}
             </time>
             
-            {/* Delete button for own posts */}
-            {isMyPost && (
-              <div className="ml-auto">
+            {/* More options */}
+            <div className="ml-auto">
+              <div className="dropdown dropdown-end">
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={handleDeletePost}
-                  className="btn btn-ghost btn-sm btn-circle text-error"
-                  disabled={deletePostMutation.isPending}
+                  tabIndex={0}
+                  className="btn btn-ghost btn-sm btn-circle text-base-content/60 hover:text-base-content hover:bg-base-200"
                 >
-                  {deletePostMutation.isPending ? (
-                    <LoadingSpinner size="sm" />
-                  ) : (
-                    <MdDelete />
-                  )}
+                  <MdMoreVert className="w-5 h-5" />
                 </motion.button>
+                {isMyPost && (
+                  <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-300">
+                    <li>
+                      <button 
+                        onClick={handleDeletePost}
+                        className="text-error hover:bg-error/10"
+                        disabled={deletePostMutation.isPending}
+                      >
+                        {deletePostMutation.isPending ? (
+                          <LoadingSpinner size="sm" />
+                        ) : (
+                          <>
+                            <MdDelete className="w-4 h-4" />
+                            Delete Post
+                          </>
+                        )}
+                      </button>
+                    </li>
+                  </ul>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Post Text */}
           {post.content && (
-            <div className="mb-3">
-              <p className="whitespace-pre-wrap break-words">{post.content}</p>
+            <div className="mb-4">
+              <p className="whitespace-pre-wrap break-words text-base leading-relaxed">{post.content}</p>
             </div>
           )}
 
           {/* Post Image */}
           {post.image_url && (
-            <div className="mb-3 rounded-2xl overflow-hidden border border-base-300">
+            <div className="mb-4 rounded-2xl overflow-hidden border border-base-300 bg-base-200">
               <img 
                 src={post.image_url} 
                 alt="Post content"
-                className="w-full max-h-96 object-cover"
+                className="w-full max-h-[500px] object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                onClick={() => window.open(post.image_url, '_blank')}
               />
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-between max-w-md mt-3">
+          <div className="flex items-center justify-between max-w-md mt-4 pt-2 border-t border-base-300/50">
             {/* Comments */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowComments(!showComments)}
-              className="flex items-center gap-2 text-base-content/60 hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-base-content/60 hover:text-primary transition-colors group"
             >
-              <div className="p-2 rounded-full hover:bg-primary/10">
+              <div className="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
                 <MdComment className="w-5 h-5" />
               </div>
-              <span className="text-sm">{post.comments_count || 0}</span>
+              <span className="text-sm font-medium">{post.comments_count || 0}</span>
             </motion.button>
 
             {/* Likes */}
@@ -205,14 +218,14 @@ const Post = ({ post }) => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleLikePost}
-              className={`flex items-center gap-2 transition-colors ${
+              className={`flex items-center gap-2 transition-colors group ${
                 isLiked 
                   ? 'text-red-500' 
                   : 'text-base-content/60 hover:text-red-500'
               }`}
               disabled={likePostMutation.isPending}
             >
-              <div className="p-2 rounded-full hover:bg-red-500/10">
+              <div className="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
                 {likePostMutation.isPending ? (
                   <LoadingSpinner size="sm" />
                 ) : isLiked ? (
@@ -221,16 +234,20 @@ const Post = ({ post }) => {
                   <MdFavoriteBorder className="w-5 h-5" />
                 )}
               </div>
-              <span className="text-sm">{post.likes_count || 0}</span>
+              <span className="text-sm font-medium">{post.likes_count || 0}</span>
             </motion.button>
 
             {/* Share */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="flex items-center gap-2 text-base-content/60 hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-base-content/60 hover:text-primary transition-colors group"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.origin + `/post/${post.id}`);
+                toast.success('Link copied to clipboard!');
+              }}
             >
-              <div className="p-2 rounded-full hover:bg-primary/10">
+              <div className="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
                 <MdShare className="w-5 h-5" />
               </div>
             </motion.button>
@@ -242,10 +259,10 @@ const Post = ({ post }) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-4 space-y-3"
+              className="mt-6 space-y-4 border-t border-base-300/50 pt-4"
             >
               {/* Comment Form */}
-              <form onSubmit={handleComment} className="flex gap-3">
+              <form onSubmit={handleComment} className="flex gap-3 bg-base-200/50 rounded-xl p-3">
                 <div className="avatar">
                   <div className="w-8 rounded-full">
                     <img 
@@ -258,7 +275,7 @@ const Post = ({ post }) => {
                   <input
                     type="text"
                     placeholder="Write a comment..."
-                    className="input input-bordered input-sm flex-1"
+                    className="input input-bordered input-sm flex-1 bg-base-100 border-base-300 focus:border-primary"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                   />
@@ -280,16 +297,16 @@ const Post = ({ post }) => {
 
               {/* Comments List */}
               {post.comments && post.comments.length > 0 && (
-                <div className="space-y-3 pl-11">
+                <div className="space-y-4">
                   {post.comments.map((comment) => (
                     <motion.div
                       key={comment.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex gap-3"
+                      className="flex gap-3 p-3 rounded-xl hover:bg-base-200/30 transition-colors"
                     >
                       <div className="avatar">
-                        <div className="w-6 rounded-full">
+                        <div className="w-8 rounded-full">
                           <img 
                             src={comment.profile_image || "/avatar-placeholder.png"} 
                             alt={comment.username}
@@ -297,18 +314,18 @@ const Post = ({ post }) => {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-2">
                           <Link 
                             to={`/profile/${comment.username}`}
-                            className="font-medium text-sm hover:underline"
+                            className="font-semibold text-sm hover:underline text-base-content"
                           >
                             {comment.full_name}
                           </Link>
-                          <span className="text-xs text-base-content/60">
+                          <span className="text-xs text-base-content/50">
                             @{comment.username}
                           </span>
                         </div>
-                        <p className="text-sm">{comment.content}</p>
+                        <p className="text-sm leading-relaxed">{comment.content}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -318,7 +335,7 @@ const Post = ({ post }) => {
           )}
         </div>
       </div>
-    </motion.article>
+    </div>
   );
 };
 

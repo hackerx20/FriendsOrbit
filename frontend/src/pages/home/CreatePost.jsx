@@ -64,11 +64,11 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="border-b border-base-300 p-4">
+    <div className="border-b border-base-300 bg-base-100 shadow-sm">
       <div className="flex gap-4">
         {/* Avatar */}
-        <div className="avatar">
-          <div className="w-12 rounded-full">
+        <div className="avatar p-4 pb-0">
+          <div className="w-14 rounded-full ring-2 ring-primary/20">
             <img 
               src={authUser?.profileImage || '/avatar-placeholder.png'} 
               alt={authUser?.username}
@@ -77,11 +77,11 @@ const CreatePost = () => {
         </div>
 
         {/* Post Form */}
-        <form onSubmit={handleSubmit} className="flex-1">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex-1 p-4 pl-0">
+          <div className="space-y-6">
             {/* Text Input */}
             <textarea
-              className="textarea textarea-ghost w-full text-lg resize-none min-h-[120px] focus:outline-none placeholder:text-base-content/50"
+              className="textarea textarea-ghost w-full text-xl resize-none min-h-[140px] focus:outline-none placeholder:text-base-content/40 leading-relaxed"
               placeholder="What's happening?"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -93,19 +93,19 @@ const CreatePost = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative rounded-2xl overflow-hidden border border-base-300"
+                className="relative rounded-3xl overflow-hidden border border-base-300 shadow-lg bg-base-200"
               >
                 <img 
                   src={image} 
                   alt="Preview" 
-                  className="w-full max-h-80 object-cover"
+                  className="w-full max-h-96 object-cover"
                 />
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   type="button"
                   onClick={removeImage}
-                  className="absolute top-2 right-2 btn btn-circle btn-sm bg-black/50 border-none text-white hover:bg-black/70"
+                  className="absolute top-3 right-3 btn btn-circle btn-sm bg-black/60 border-none text-white hover:bg-black/80 backdrop-blur-sm"
                 >
                   <MdClose />
                 </motion.button>
@@ -113,18 +113,18 @@ const CreatePost = () => {
             )}
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between pt-4 border-t border-base-300/30">
+              <div className="flex items-center gap-3">
                 {/* Image Upload */}
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   type="button"
                   onClick={() => imageRef.current?.click()}
-                  className="btn btn-ghost btn-circle btn-sm text-primary"
+                  className="btn btn-ghost btn-circle text-primary hover:bg-primary/10 transition-colors"
                   title="Add image"
                 >
-                  <MdImage className="w-5 h-5" />
+                  <MdImage className="w-6 h-6" />
                 </motion.button>
 
                 {/* Emoji Button (placeholder) */}
@@ -132,10 +132,10 @@ const CreatePost = () => {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   type="button"
-                  className="btn btn-ghost btn-circle btn-sm text-primary"
+                  className="btn btn-ghost btn-circle text-primary hover:bg-primary/10 transition-colors"
                   title="Add emoji"
                 >
-                  <MdEmojiEmotions className="w-5 h-5" />
+                  <MdEmojiEmotions className="w-6 h-6" />
                 </motion.button>
 
                 <input
@@ -148,10 +148,16 @@ const CreatePost = () => {
               </div>
 
               {/* Character Count & Post Button */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {content && (
-                  <div className={`text-sm ${content.length > 1800 ? 'text-warning' : 'text-base-content/60'}`}>
-                    {content.length}/2000
+                  <div className="flex items-center gap-2">
+                    <div className={`radial-progress text-xs ${
+                      content.length > 1800 ? 'text-warning' : 
+                      content.length > 1600 ? 'text-info' : 'text-primary'
+                    }`} 
+                    style={{"--value": (content.length / 2000) * 100, "--size": "2rem"}}>
+                      {content.length > 1800 && (2000 - content.length)}
+                    </div>
                   </div>
                 )}
                 
@@ -159,7 +165,7 @@ const CreatePost = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  className="btn btn-primary btn-sm rounded-full px-6"
+                  className="btn btn-primary rounded-full px-8 font-bold shadow-lg hover:shadow-xl transition-all duration-300"
                   disabled={(!content.trim() && !image) || createPostMutation.isPending}
                 >
                   {createPostMutation.isPending ? (
