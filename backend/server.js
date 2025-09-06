@@ -89,7 +89,7 @@ io.use(async (socket, next) => {
     }
 
     const jwt = await import('jsonwebtoken');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.default.verify(token, process.env.JWT_SECRET);
     
     const { User } = await import('./models/User.js');
     const user = await User.findById(decoded.userId);

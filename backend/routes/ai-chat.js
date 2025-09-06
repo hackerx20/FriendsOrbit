@@ -1,23 +1,33 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AIChat } from '../models/AIChat.js';
 import { authenticateToken } from '../middleware/auth.js';
 import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash",
-  generationConfig: {
-    temperature: 0.7,
-    topP: 0.8,
-    topK: 40,
-    maxOutputTokens: 1000,
+// Mock AI response function (replace with actual AI service)
+const generateAIResponse = async (prompt) => {
+  // Simulate AI processing delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Simple mock responses based on keywords
+  const responses = {
+    'react': 'React is a powerful JavaScript library for building user interfaces. Here are some best practices:\n\n1. Use functional components with hooks\n2. Implement proper state management\n3. Optimize with React.memo and useMemo\n4. Follow component composition patterns\n\nWhat specific React topic would you like to explore?',
+    'javascript': 'JavaScript is a versatile programming language. Here are some key concepts:\n\n1. Understand closures and scope\n2. Master async/await and promises\n3. Learn ES6+ features\n4. Practice functional programming\n\nWhat JavaScript concept would you like to learn more about?',
+    'design': 'Great design principles include:\n\n1. Keep it simple and intuitive\n2. Maintain consistency\n3. Use proper hierarchy\n4. Consider accessibility\n5. Test with real users\n\nWhat design challenge are you working on?',
+    'default': 'I\'m here to help! I can assist with:\n\n• Programming and development\n• Design and UX\n• Technology questions\n• General advice\n\nWhat would you like to know more about?'
+  };
+  
+  const lowerPrompt = prompt.toLowerCase();
+  for (const [keyword, response] of Object.entries(responses)) {
+    if (lowerPrompt.includes(keyword)) {
+      return response;
+    }
   }
-});
+  
+  return responses.default;
+};
 
 // Rate limiting for AI chat
 const aiChatLimit = rateLimit({
@@ -86,20 +96,8 @@ router.post('/sessions/:sessionId/messages', authenticateToken, aiChatLimit, [
     // Get conversation history for context
     const recentMessages = await AIChat.getSessionMessages(sessionId, 10);
     
-    // Prepare conversation history for Gemini
-    const systemPrompt = `You are FriendsOrbit AI, a helpful and friendly AI assistant integrated into a social media platform. You can help users with various tasks, answer questions, provide advice, and engage in casual conversation. Be conversational, helpful, and maintain a positive tone. Keep responses concise but informative.`;
-    
-    // Build conversation context
-    let conversationHistory = systemPrompt + '\n\n';
-    recentMessages.slice(-9).forEach(msg => {
-      conversationHistory += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
-    });
-    conversationHistory += `User: ${content}\nAssistant:`;
-
-    // Get AI response from Gemini
-    const result = await model.generateContent(conversationHistory);
-    const response = await result.response;
-    const aiResponse = response.text();
+    // Generate AI response using mock function
+    const aiResponse = await generateAIResponse(content);
 
     // Save AI response
     const aiMessage = await AIChat.addMessage(sessionId, 'assistant', aiResponse);
@@ -110,11 +108,6 @@ router.post('/sessions/:sessionId/messages', authenticateToken, aiChatLimit, [
     });
   } catch (error) {
     console.error('AI chat error:', error);
-    
-    if (error.message?.includes('quota') || error.message?.includes('limit')) {
-      return res.status(429).json({ error: 'AI service temporarily unavailable. Please try again later.' });
-    }
-    
     res.status(500).json({ error: 'Failed to get AI response' });
   }
 });
