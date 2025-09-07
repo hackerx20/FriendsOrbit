@@ -3,6 +3,8 @@ import { body, validationResult } from 'express-validator';
 import { Post } from '../models/Post.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { v2 as cloudinary } from 'cloudinary';
+import { ContentModeration } from '../models/ContentModeration.js';
+import { Recommendations } from '../models/Recommendations.js';
 
 const router = express.Router();
 
@@ -22,6 +24,19 @@ router.post('/create', authenticateToken, [
       return res.status(400).json({ error: 'Post must have content or image' });
     }
 
+    // Content moderation
+    if (content) {
+      const moderationResult = await ContentModeration.detectSpam(content);
+      const inappropriateResult = await ContentModeration.detectInappropriateContent(content);
+      
+      if (moderationResult.isSpam || inappropriateResult.isInappropriate) {
+        return res.status(400).json({ 
+          error: 'Content blocked by moderation system',
+          reason: moderationResult.isSpam ? 'spam' : 'inappropriate_content'
+        });
+      }
+    }
+
     let imageUrl = null;
     if (image) {
       const uploadResult = await cloudinary.uploader.upload(image);
@@ -33,8 +48,23 @@ router.post('/create', authenticateToken, [
       content,
       imageUrl
     });
+    
+    // Log moderation result
+    if (content) {
+      await ContentModeration.moderatePost(post.id, content);
+    }
 
     const fullPost = await Post.findById(post.id);
+    
+    // Emit real-time update
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('feed_update', {
+        type: 'new_post',
+        data: fullPost
+      });
+    }
+    
     res.status(201).json(fullPost);
   } catch (error) {
     console.error('Create post error:', error);
@@ -133,6 +163,26 @@ router.post('/like/:id', authenticateToken, async (req, res) => {
     const postId = parseInt(req.params.id);
     const result = await Post.toggleLike(postId, req.user.id);
     
+    // Log interaction for recommendations
+    if (result.liked) {
+      await Recommendations.logInteraction(req.user.id, 'post', postId, 'like');
+    }
+    
+    // Emit real-time update
+    const io = req.app.get('io');
+    if (io) {
+      const post = await Post.findById(postId);
+      io.emit('feed_update', {
+        type: 'post_liked',
+        data: { 
+          postId, 
+          userId: req.user.id, 
+          likesCount: post.likes_count,
+          liked: result.liked
+        }
+      });
+    }
+    
     res.json(result);
   } catch (error) {
     console.error('Toggle like error:', error);
@@ -152,8 +202,32 @@ router.post('/comment/:id', authenticateToken, [
 
     const postId = parseInt(req.params.id);
     const { content } = req.body;
+    
+    // Content moderation for comments
+    const moderationResult = await ContentModeration.detectSpam(content);
+    const inappropriateResult = await ContentModeration.detectInappropriateContent(content);
+    
+    if (moderationResult.isSpam || inappropriateResult.isInappropriate) {
+      return res.status(400).json({ 
+        error: 'Comment blocked by moderation system',
+        reason: moderationResult.isSpam ? 'spam' : 'inappropriate_content'
+      });
+    }
 
     const comment = await Post.addComment(postId, req.user.id, content);
+    
+    // Log interaction for recommendations
+    await Recommendations.logInteraction(req.user.id, 'post', postId, 'comment');
+    
+    // Emit real-time update
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('feed_update', {
+        type: 'new_comment',
+        data: { postId, comment }
+      });
+    }
+    
     res.json(comment);
   } catch (error) {
     console.error('Add comment error:', error);

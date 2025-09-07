@@ -16,6 +16,7 @@ import {
 
 import { useSocket } from '../../context/SocketContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import TypingIndicator from '../../components/common/TypingIndicator';
 
 const MessagesPage = () => {
   const { userId } = useParams();
@@ -164,12 +165,43 @@ const MessagesPage = () => {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!message.trim() || !selectedUser) return;
+    
+    // Stop typing indicator
+    if (socket) {
+      socket.emit('typing_stop', { receiverId: selectedUser.id });
+    }
 
     sendMessageMutation.mutate({
       receiverId: selectedUser.id,
       content: message.trim()
     });
   };
+  
+  // Handle typing indicators
+  const handleTyping = (value) => {
+    setMessage(value);
+    
+    if (!socket || !selectedUser) return;
+    
+    if (value.trim()) {
+      socket.emit('typing_start', { receiverId: selectedUser.id });
+    } else {
+      socket.emit('typing_stop', { receiverId: selectedUser.id });
+    }
+  };
+  
+  // Stop typing when user stops typing for 2 seconds
+  useEffect(() => {
+    if (!socket || !selectedUser) return;
+    
+    const timeout = setTimeout(() => {
+      if (message.trim()) {
+        socket.emit('typing_stop', { receiverId: selectedUser.id });
+      }
+    }, 2000);
+    
+    return () => clearTimeout(timeout);
+  }, [message, socket, selectedUser]);
 
   const formatMessageTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -395,6 +427,11 @@ const MessagesPage = () => {
                 </AnimatePresence>
               )}
               <div ref={messagesEndRef} />
+              
+              {/* Typing Indicator */}
+              {isUserTyping(selectedUser.id) && (
+                <TypingIndicator username={selectedUser.full_name} />
+              )}
             </div>
 
             {/* Message Input */}
@@ -405,7 +442,7 @@ const MessagesPage = () => {
                   placeholder="Type a message..."
                   className="input input-bordered flex-1"
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => handleTyping(e.target.value)}
                   disabled={sendMessageMutation.isPending}
                 />
                 <motion.button

@@ -1,17 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { useSocket } from "../../context/SocketContext";
 
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 
 const Posts = ({ feedType, username, userId }) => {
+  const { feedUpdates, clearFeedUpdates } = useSocket();
+  
   const getPostEndpoint = () => {
     switch (feedType) {
       case "forYou":
         return "/api/posts/all";
       case "following":
         return "/api/posts/following";
+      case "recommended":
+        return "/api/recommendations/posts";
+      case "trending":
+        return "/api/recommendations/trending";
       case "posts":
         return `/api/posts/user/${username}`;
       case "likes":
@@ -55,6 +62,15 @@ const Posts = ({ feedType, username, userId }) => {
   useEffect(() => {
     refetch();
   }, [feedType, refetch, username]);
+  
+  // Handle real-time feed updates
+  useEffect(() => {
+    if (feedUpdates.length > 0 && (feedType === "forYou" || feedType === "following")) {
+      // Refetch posts when there are new updates
+      refetch();
+      clearFeedUpdates();
+    }
+  }, [feedUpdates, feedType, refetch, clearFeedUpdates]);
 
   if (isLoading || isRefetching) {
     return (

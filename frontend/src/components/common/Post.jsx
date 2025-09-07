@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
+import { useSocket } from "../../context/SocketContext";
 
 // Icons
 import { 
@@ -22,12 +23,31 @@ import LoadingSpinner from "./LoadingSpinner";
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
   const [showComments, setShowComments] = useState(false);
+  const [localLikesCount, setLocalLikesCount] = useState(post.likes_count || 0);
+  const [localCommentsCount, setLocalCommentsCount] = useState(post.comments_count || 0);
   const queryClient = useQueryClient();
+  const { socket, feedUpdates } = useSocket();
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
   const isMyPost = authUser?.id === post.user_id;
   const isLiked = false; // TODO: Implement like status check
+  
+  // Handle real-time updates for this post
+  useEffect(() => {
+    const postUpdates = feedUpdates.filter(update => 
+      (update.type === 'post_liked' && update.data.postId === post.id) ||
+      (update.type === 'new_comment' && update.data.postId === post.id)
+    );
+    
+    postUpdates.forEach(update => {
+      if (update.type === 'post_liked') {
+        setLocalLikesCount(update.data.likesCount);
+      } else if (update.type === 'new_comment') {
+        setLocalCommentsCount(prev => prev + 1);
+      }
+    });
+  }, [feedUpdates, post.id]);
 
   // Delete post mutation
   const deletePostMutation = useMutation({
@@ -92,12 +112,32 @@ const Post = ({ post }) => {
 
   const handleLikePost = () => {
     likePostMutation.mutate();
+    
+    // Emit real-time update
+    if (socket) {
+      socket.emit('post_liked', {
+        postId: post.id,
+        userId: authUser.id,
+        likesCount: localLikesCount + (isLiked ? -1 : 1)
+      });
+    }
   };
 
   const handleComment = (e) => {
     e.preventDefault();
     if (!comment.trim()) return;
     commentMutation.mutate(comment.trim());
+    
+    // Emit real-time update
+    if (socket) {
+      socket.emit('new_comment', {
+        postId: post.id,
+        comment: {
+          content: comment.trim(),
+          user: authUser
+        }
+      });
+    }
   };
 
   const formatDate = (dateString) => {
@@ -210,7 +250,7 @@ const Post = ({ post }) => {
               <div className="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
                 <MdComment className="w-5 h-5" />
               </div>
-              <span className="text-sm font-medium">{post.comments_count || 0}</span>
+              <span className="text-sm font-medium">{localCommentsCount}</span>
             </motion.button>
 
             {/* Likes */}
@@ -234,7 +274,7 @@ const Post = ({ post }) => {
                   <MdFavoriteBorder className="w-5 h-5" />
                 )}
               </div>
-              <span className="text-sm font-medium">{post.likes_count || 0}</span>
+              <span className="text-sm font-medium">{localLikesCount}</span>
             </motion.button>
 
             {/* Share */}

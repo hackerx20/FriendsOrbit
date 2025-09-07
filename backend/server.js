@@ -16,6 +16,8 @@ import userRoutes from './routes/users.js';
 import postRoutes from './routes/posts.js';
 import messageRoutes from './routes/messages.js';
 import aiChatRoutes from './routes/ai-chat.js';
+import recommendationRoutes from './routes/recommendations.js';
+import moderationRoutes from './routes/moderation.js';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -77,6 +79,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/ai-chat', aiChatRoutes);
+app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/moderation', moderationRoutes);
 
 // Socket.IO for real-time features
 const connectedUsers = new Map();
@@ -112,6 +116,12 @@ io.on('connection', (socket) => {
   // Store user connection
   connectedUsers.set(socket.userId, socket.id);
   socket.join(`user_${socket.userId}`);
+  
+  // Broadcast user online status
+  socket.broadcast.emit('user_online', {
+    userId: socket.userId,
+    username: socket.user.username
+  });
 
   // Handle typing indicators
   socket.on('typing_start', ({ receiverId }) => {
@@ -124,6 +134,30 @@ io.on('connection', (socket) => {
   socket.on('typing_stop', ({ receiverId }) => {
     socket.to(`user_${receiverId}`).emit('user_stopped_typing', {
       userId: socket.userId
+    });
+  });
+  
+  // Handle real-time post updates
+  socket.on('new_post', (postData) => {
+    socket.broadcast.emit('feed_update', {
+      type: 'new_post',
+      data: postData
+    });
+  });
+  
+  // Handle real-time like updates
+  socket.on('post_liked', ({ postId, userId, likesCount }) => {
+    socket.broadcast.emit('feed_update', {
+      type: 'post_liked',
+      data: { postId, userId, likesCount }
+    });
+  });
+  
+  // Handle real-time comment updates
+  socket.on('new_comment', ({ postId, comment }) => {
+    socket.broadcast.emit('feed_update', {
+      type: 'new_comment',
+      data: { postId, comment }
     });
   });
 

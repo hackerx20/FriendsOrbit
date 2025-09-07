@@ -7,12 +7,14 @@ import { motion } from 'framer-motion';
 import { MdImage, MdClose, MdEmojiEmotions } from 'react-icons/md';
 
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { useSocket } from '../../context/SocketContext';
 
 const CreatePost = () => {
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
   const imageRef = useRef(null);
   const queryClient = useQueryClient();
+  const { socket } = useSocket();
 
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
@@ -32,6 +34,15 @@ const CreatePost = () => {
       setImage(null);
       toast.success('Post created successfully!');
       queryClient.invalidateQueries(['posts']);
+      
+      // Emit real-time update
+      if (socket) {
+        socket.emit('new_post', {
+          content,
+          image,
+          user: authUser
+        });
+      }
     },
     onError: (error) => {
       toast.error(error.message);

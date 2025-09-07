@@ -16,6 +16,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [typingUsers, setTypingUsers] = useState(new Map());
+  const [feedUpdates, setFeedUpdates] = useState([]);
 
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
@@ -59,6 +60,16 @@ export const SocketProvider = ({ children }) => {
           return newMap;
         });
       });
+      
+      // Handle real-time feed updates
+      newSocket.on('feed_update', (update) => {
+        setFeedUpdates(prev => [update, ...prev.slice(0, 49)]); // Keep last 50 updates
+      });
+      
+      // Handle user online/offline status
+      newSocket.on('user_online', ({ userId, username }) => {
+        setOnlineUsers(prev => new Set([...prev, userId]));
+      });
 
       newSocket.on('disconnect', () => {
         console.log('Disconnected from server');
@@ -75,8 +86,10 @@ export const SocketProvider = ({ children }) => {
     socket,
     onlineUsers,
     typingUsers,
+    feedUpdates,
     isUserOnline: (userId) => onlineUsers.has(userId),
-    isUserTyping: (userId) => typingUsers.has(userId)
+    isUserTyping: (userId) => typingUsers.has(userId),
+    clearFeedUpdates: () => setFeedUpdates([])
   };
 
   return (

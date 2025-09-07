@@ -98,14 +98,14 @@ const Sidebar = () => {
                       to={item.path}
                       className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 relative overflow-hidden group ${
                         isActive 
-                          ? 'bg-gradient-to-r from-primary/20 to-secondary/20 text-primary font-semibold shadow-lg border border-primary/20' 
+                          ? 'bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-semibold shadow-md border border-primary/10' 
                           : 'text-base-content hover:bg-base-200/70 hover:text-primary'
                       }`}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="activeNavItem"
-                          className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl"
+                          className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl"
                           initial={false}
                         />
                       )}

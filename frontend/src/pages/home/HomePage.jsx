@@ -9,21 +9,23 @@ const HomePage = () => {
 
   const feedTabs = [
     { id: "forYou", label: "For You" },
-    { id: "following", label: "Following" }
+    { id: "following", label: "Following" },
+    { id: "recommended", label: "Recommended" },
+    { id: "trending", label: "Trending" }
   ];
 
   return (
     <div className="flex-[4_4_0] border-r border-base-300 min-h-screen bg-base-100">
       {/* Header */}
       <div className="sticky top-0 bg-base-100/90 backdrop-blur-xl border-b border-base-300/50 z-10 shadow-sm">
-        <div className="flex">
+        <div className="flex overflow-x-auto scrollbar-hide">
           {feedTabs.map((tab) => (
             <motion.div
               key={tab.id}
-              className={`flex-1 p-6 text-center cursor-pointer relative transition-all duration-300 ${
+              className={`flex-shrink-0 px-6 py-4 text-center cursor-pointer relative transition-all duration-300 min-w-fit ${
                 feedType === tab.id 
-                  ? 'text-primary font-bold text-lg' 
-                  : 'text-base-content/60 hover:text-base-content hover:bg-base-200/30 font-semibold'
+                  ? 'text-primary font-semibold text-base' 
+                  : 'text-base-content/60 hover:text-base-content hover:bg-base-200/30 font-medium text-sm'
               }`}
               onClick={() => setFeedType(tab.id)}
               whileHover={{ scale: 1.02 }}
@@ -32,7 +34,7 @@ const HomePage = () => {
               {tab.label}
               {feedType === tab.id && (
                 <motion.div
-                  className="absolute bottom-0 left-1/2 w-16 h-1 bg-gradient-to-r from-primary to-secondary rounded-full shadow-lg"
+                  className="absolute bottom-0 left-1/2 w-12 h-0.5 bg-primary rounded-full"
                   layoutId="activeTab"
                   initial={false}
                   style={{ x: '-50%' }}
